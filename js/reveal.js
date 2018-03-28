@@ -37,6 +37,10 @@
 		// Configuration defaults, can be overridden at initialization time
 		config = {
 
+                        //jjf use the background from the first slide in a stack, ignore others
+                        //default to false, normal behavior
+                        backgroundPerStack: false,
+
 			// The "normal" size of the presentation, aspect ratio will be preserved
 			// when the presentation is scaled to fit different resolutions
 			width: 960,
@@ -3027,7 +3031,8 @@
 				currentBackground = backgroundh;
 			}
 
-			if( includeAll || h === indexh ) {
+                        //jjf adding backgroundPerStack flag
+                        if( !config.backgroundPerStack && (includeAll || h === indexh) ) {
 				toArray( backgroundh.querySelectorAll( '.slide-background' ) ).forEach( function( backgroundv, v ) {
 
 					backgroundv.classList.remove( 'past' );
@@ -3052,57 +3057,59 @@
 
 		} );
 
-		// Stop content inside of previous backgrounds
-		if( previousBackground ) {
+		//jjf fix reloading if same background
+        	if( previousBackground !== currentBackground ) {
+			// Stop content inside of previous backgrounds
+			if( previousBackground ) {
 
-			stopEmbeddedContent( previousBackground );
+				stopEmbeddedContent( previousBackground );
 
-		}
-
-		// Start content in the current background
-		if( currentBackground ) {
-
-			startEmbeddedContent( currentBackground );
-
-			var backgroundImageURL = currentBackground.style.backgroundImage || '';
-
-			// Restart GIFs (doesn't work in Firefox)
-			if( /\.gif/i.test( backgroundImageURL ) ) {
-				currentBackground.style.backgroundImage = '';
-				window.getComputedStyle( currentBackground ).opacity;
-				currentBackground.style.backgroundImage = backgroundImageURL;
 			}
 
-			// Don't transition between identical backgrounds. This
-			// prevents unwanted flicker.
-			var previousBackgroundHash = previousBackground ? previousBackground.getAttribute( 'data-background-hash' ) : null;
-			var currentBackgroundHash = currentBackground.getAttribute( 'data-background-hash' );
-			if( currentBackgroundHash && currentBackgroundHash === previousBackgroundHash && currentBackground !== previousBackground ) {
-				dom.background.classList.add( 'no-transition' );
+			// Start content in the current background
+			if( currentBackground ) {
+
+				startEmbeddedContent( currentBackground );
+
+				var backgroundImageURL = currentBackground.style.backgroundImage || '';
+
+				// Restart GIFs (doesn't work in Firefox)
+				if( /\.gif/i.test( backgroundImageURL ) ) {
+					currentBackground.style.backgroundImage = '';
+					window.getComputedStyle( currentBackground ).opacity;
+					currentBackground.style.backgroundImage = backgroundImageURL;
+				}
+
+				// Don't transition between identical backgrounds. This
+				// prevents unwanted flicker.
+				var previousBackgroundHash = previousBackground ? previousBackground.getAttribute( 'data-background-hash' ) : null;
+				var currentBackgroundHash = currentBackground.getAttribute( 'data-background-hash' );
+				if( currentBackgroundHash && currentBackgroundHash === previousBackgroundHash && currentBackground !== previousBackground ) {
+					dom.background.classList.add( 'no-transition' );
+				}
+
+				previousBackground = currentBackground;
+
 			}
 
-			previousBackground = currentBackground;
+			// If there's a background brightness flag for this slide,
+			// bubble it to the .reveal container
+			if( currentSlide ) {
+				[ 'has-light-background', 'has-dark-background' ].forEach( function( classToBubble ) {
+					if( currentSlide.classList.contains( classToBubble ) ) {
+						dom.wrapper.classList.add( classToBubble );
+					}
+					else {
+						dom.wrapper.classList.remove( classToBubble );
+					}
+				} );
+			}
 
+			// Allow the first background to apply without transition
+			setTimeout( function() {
+				dom.background.classList.remove( 'no-transition' );
+			}, 1 );
 		}
-
-		// If there's a background brightness flag for this slide,
-		// bubble it to the .reveal container
-		if( currentSlide ) {
-			[ 'has-light-background', 'has-dark-background' ].forEach( function( classToBubble ) {
-				if( currentSlide.classList.contains( classToBubble ) ) {
-					dom.wrapper.classList.add( classToBubble );
-				}
-				else {
-					dom.wrapper.classList.remove( classToBubble );
-				}
-			} );
-		}
-
-		// Allow the first background to apply without transition
-		setTimeout( function() {
-			dom.background.classList.remove( 'no-transition' );
-		}, 1 );
-
 	}
 
 	/**

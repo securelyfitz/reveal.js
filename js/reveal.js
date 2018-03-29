@@ -37,10 +37,6 @@
 		// Configuration defaults, can be overridden at initialization time
 		config = {
 
-                        //jjf use the background from the first slide in a stack, ignore others
-                        //default to false, normal behavior
-                        backgroundPerStack: false,
-
 			// The "normal" size of the presentation, aspect ratio will be preserved
 			// when the presentation is scaled to fit different resolutions
 			width: 960,
@@ -3031,8 +3027,7 @@
 				currentBackground = backgroundh;
 			}
 
-                        //jjf adding backgroundPerStack flag
-                        if( !config.backgroundPerStack && (includeAll || h === indexh) ) {
+			if( includeAll || h === indexh ) {
 				toArray( backgroundh.querySelectorAll( '.slide-background' ) ).forEach( function( backgroundv, v ) {
 
 					backgroundv.classList.remove( 'past' );
@@ -3048,8 +3043,8 @@
 					else {
 						backgroundv.classList.add( 'present' );
 
-						// Only if this is the present horizontal and vertical slide
-						if( h === indexh ) currentBackground = backgroundv;
+						// Only if this is the present horizontal and vertical slide AND there's no background elements defined on this slide
+						if( (h === indexh) && (backgroundv.childElementCount<0) ) currentBackground = backgroundv;
 					}
 
 				} );

@@ -3043,8 +3043,8 @@
 					else {
 						backgroundv.classList.add( 'present' );
 
-						// Only if this is the present horizontal and vertical slide AND there's no background elements defined on this slide
-						if( (h === indexh) && (backgroundv.childElementCount<0) ) currentBackground = backgroundv;
+						// Only if this is the present horizontal and vertical slide AND there are background elements defined on this slide
+						if( (h === indexh) && (backgroundv.childElementCount>0) ) currentBackground = backgroundv;
 					}
 
 				} );
